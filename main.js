@@ -2,36 +2,51 @@
 //The main goal is to store as little global code as possible. 
 //Think carefully about where each of logic should reside. Each little piece of functionality should be able to fit in the game, player, or gameboard objects.
 //wrap gameboard, displaycontroller inside an IIFE.
-//Logic 1 
+//Logic -- 
+//Tic tac toe is a board with 3 columns and 3 rows.
+//X goes first, regardless of the player.
+//Anytime a marker is placed, it should check whether that space in the object array to be empty.
+//Whenever a marker is placed successfully, the board is updated to reflect the newly placed marker.
+//The active player is switched, and so is the marker. The logic repeats until 3 contigious markers is found.
+//if three contigious markers are found, the player with those markers is declared the winner, and the gameboard is reset with empty spaces.
+//The logic repeats.
 
-function Gameboard(){
+function Gameboard(){                                                     
     const rows = 3;                                                        
     const columns = 3;
     const board = [];
 
-    for(let i = 0; i < rows; i++){                                          //For loop logic to create rows and columns of the tic-tac-toe gameboard
+    for(let i = 0; i < rows; i++){                                          //For loop logic to create rows and columns of a 2D array to store objects.
         board[i] = [];
         for(let j = 0; j < columns; j++){
             board[i].push(Cell());                                          //Calls Cell factory function to push the key value of the elements returned by Cell.
         }
     }   
-    
-    const placeMarker = () => {
-        player = Player();
-        board[0][0] = player.marker;
+    const getBoard =  () => board;
+
+    const placeMarker = (column, row, player) => {
+        const availableCells = board.filter((rows) => row[column].getValue() === 0).map(row => row[column]);
+        console.log(availableCells);
     }
-    console.log(board);
-  return {board}
+
+    
+    return {getBoard, placeMarker}
 }
 
-function Cell() {
-    let space = '';
+function Cell() {                                                           //pushes either empty cell or new cell depending on the player's turn.
+    let value = '';                                                          
+    const addMarker = (player) => {                                         
+        value = player;
+    }
+    const getValue = () => value;
 
-    return{ space };
+    return{ getValue, addMarker };
 }
-function Player() {
-    playerOne = 'Jay';
-    playerTwo = 'Franc';
+function GameController(  
+    playerOne = 'Jay',
+    playerTwo = 'Franc'
+){  
+    const board = Gameboard();                                             //Initializes the gameboard object to create and update the board.
 
     const players = [
         {
@@ -42,13 +57,25 @@ function Player() {
             name:playerTwo,
             marker: 'O',
         }
-    ]
-    return {players}
+    ];
+    let activePlayer = players[0];
+
+    const switchPlayerTurn = () => {
+
+        if(activePlayer === players[0]){
+            activePlayer = players[1];
+            return activePlayer;
+
+        }else if(activePlayer === player[1]){
+            activePlayer = players[0];
+            return activePlayer;
+        }
+    }
+    const getActivePlayer = () => activePlayer;
+
+    board.placeMarker(column,row, getActivePlayer().marker);
+    return {getActivePlayer, playRound}
 }
 
-function GameController(){
-
-}
-
-const board = Gameboard();
+const game = GameController();
 
