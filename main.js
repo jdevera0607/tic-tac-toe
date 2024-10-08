@@ -23,14 +23,16 @@ function Gameboard(){
         }
     }   
     const getBoard =  () => board;
-
+   
     const placeMarker = (column, row, player) => {
-        const availableCells = board.filter((rows) => row[column].getValue() === 0).map(row => row[column]);
-        console.log(availableCells);
-    }
 
-    
-    return {getBoard, placeMarker}
+        board[column][row].addMarker(player);
+    }
+    const printBoard = () => {
+        const boardWithMarkers = board.map((row) => row.map((cell) => cell.getValue()))
+        console.log(boardWithMarkers)
+    }
+    return {getBoard, placeMarker, printBoard}
 }
 
 function Cell() {                                                           //pushes either empty cell or new cell depending on the player's turn.
@@ -66,14 +68,27 @@ function GameController(
             activePlayer = players[1];
             return activePlayer;
 
-        }else if(activePlayer === player[1]){
+        }else if(activePlayer === players[1]){
             activePlayer = players[0];
             return activePlayer;
         }
     }
     const getActivePlayer = () => activePlayer;
 
-    board.placeMarker(column,row, getActivePlayer().marker);
+    const printNewRound = () => {
+        board.printBoard();
+    }
+    const playRound = (column, row) => {
+        board.placeMarker(column, row, getActivePlayer().marker)
+        switchPlayerTurn();
+        printNewRound();
+    }
+    playRound([0],[1]);
+    playRound([2],[1]);
+    playRound([0],[2]);
+    playRound([1],[1]);
+    switchPlayerTurn();
+    printNewRound();
     return {getActivePlayer, playRound}
 }
 
