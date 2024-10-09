@@ -11,86 +11,88 @@
 //if three contigious markers are found, the player with those markers is declared the winner, and the gameboard is reset with empty spaces.
 //The logic repeats.
 
-function Gameboard(){                                                     
-    const rows = 3;                                                        
+function Gameboard() {
+    const rows = 3;
     const columns = 3;
     const board = [];
+    let val = '';
 
-    for(let i = 0; i < rows; i++){                                          //For loop logic to create rows and columns of a 2D array to store objects.
-        board[i] = [];
-        for(let j = 0; j < columns; j++){
-            board[i].push(Cell());                                          //Calls Cell factory function to push the key value of the elements returned by Cell.
+    let rowIndex;
+    let colIndex;
+
+    for(rowIndex = 0; rowIndex < rows; rowIndex++){
+        board[rowIndex] = []
+        for(colIndex = 0; colIndex < columns; colIndex++){
+            board[rowIndex][colIndex] = val;
         }
-    }   
-    const getBoard =  () => board;
-   
-    const placeMarker = (column, row, player) => {
+    }
+    const getBoard = () => board;
 
-        board[column][row].addMarker(player);
+    const placeMarker = (col, row, player) => {
+        if(board[col][row] == val){
+            board[col][row] = player;
+        }else{
+           console.log('invalid move');
+           const re = GameController();
+           re.switchPlayer();
+        }
+        return board;
     }
-    const printBoard = () => {
-        const boardWithMarkers = board.map((row) => row.map((cell) => cell.getValue()))
-        console.log(boardWithMarkers)
+
+    const logBoard = () => {
+        console.log(board);
     }
-    return {getBoard, placeMarker, printBoard}
+
+    return {getBoard, placeMarker, logBoard}
 }
 
-function Cell() {                                                           //pushes either empty cell or new cell depending on the player's turn.
-    let value = '';                                                          
-    const addMarker = (player) => {                                         
-        value = player;
-    }
-    const getValue = () => value;
+function Player(name, marker){
+    const players = [{name, marker}];
+    const getName = () => name;
+    const getMarker = () => marker;
 
-    return{ getValue, addMarker };
+    return {getName, getMarker};
+    
 }
-function GameController(  
-    playerOne = 'Jay',
-    playerTwo = 'Franc'
-){  
-    const board = Gameboard();                                             //Initializes the gameboard object to create and update the board.
 
-    const players = [
-        {
-            name: playerOne,
-            marker: 'X',
-        },
-        {
-            name:playerTwo,
-            marker: 'O',
-        }
-    ];
-    let activePlayer = players[0];
+function GameController(){
+    const board = Gameboard();
 
-    const switchPlayerTurn = () => {
+    const playerOne = Player('Jay', 'x');  
+    const playerTwo = Player('Franc', 'o');
 
-        if(activePlayer === players[0]){
-            activePlayer = players[1];
-            return activePlayer;
+    let activePlayer = playerOne;
 
-        }else if(activePlayer === players[1]){
-            activePlayer = players[0];
-            return activePlayer;
-        }
+    // console.log(activePlayer.getName());
+
+    const switchPlayer = () => {
+        activePlayer = activePlayer == playerOne? playerTwo : playerOne;
     }
     const getActivePlayer = () => activePlayer;
 
-    const printNewRound = () => {
-        board.printBoard();
+    
+    // console.log(activePlayer.getName());
+    // console.log(playerOne.getName());
+
+    const playRound = (col, row) => {
+        board.placeMarker(col, row, getActivePlayer().getMarker())
+
+        getActivePlayer();
+        switchPlayer();
     }
-    const playRound = (column, row) => {
-        board.placeMarker(column, row, getActivePlayer().marker)
-        switchPlayerTurn();
-        printNewRound();
-    }
-    playRound([0],[1]);
-    playRound([2],[1]);
-    playRound([0],[2]);
-    playRound([1],[1]);
-    switchPlayerTurn();
-    printNewRound();
-    return {getActivePlayer, playRound}
+        
+    return {getActivePlayer, getBoard : board.getBoard, playRound, switchPlayer, logBoard: board.logBoard}
+    
 }
 
+function DisplayController(){
+
+}
 const game = GameController();
+game.playRound(0, 1)
+game.playRound(0, 0)
+game.logBoard();
+game.playRound(0, 1)
+game.playRound(0, 2)
+game.logBoard();
 
