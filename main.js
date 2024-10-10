@@ -28,19 +28,22 @@ function Gameboard() {
     }
     const getBoard = () => board;
 
-    const placeMarker = (col, row, player) => {
+  function placeMarker(col, row, player) {
+        
         if(board[col][row] == val){
             board[col][row] = player;
-        }else{
-           console.log('invalid move');
-           const re = GameController();
-           re.switchPlayer();
+            return board;
+        }else if(board[col][row] == player){
+            const err = 'Invalid move!';
+           return err;
         }
-        return board;
     }
 
     const logBoard = () => {
-        console.log(board);
+        board.map(function(space, index){
+            console.log(space);
+        })
+        
     }
 
     return {getBoard, placeMarker, logBoard}
@@ -73,26 +76,26 @@ function GameController(){
     
     // console.log(activePlayer.getName());
     // console.log(playerOne.getName());
-
+  
     const playRound = (col, row) => {
-        board.placeMarker(col, row, getActivePlayer().getMarker())
+        board.placeMarker(col, row, activePlayer.getMarker())
+        board.logBoard();
+    }
+    playRound(1, 2);
+    playRound(1, 2);
+    playRound(2, 2);
 
         getActivePlayer();
         switchPlayer();
-    }
         
     return {getActivePlayer, getBoard : board.getBoard, playRound, switchPlayer, logBoard: board.logBoard}
     
 }
 
 function DisplayController(){
-
-}
-const game = GameController();
-game.playRound(0, 1)
-game.playRound(0, 0)
-game.logBoard();
-game.playRound(0, 1)
-game.playRound(0, 2)
-game.logBoard();
+    const game = GameController();
+    game.getBoard;
+ 
+} 
+DisplayController();
 
