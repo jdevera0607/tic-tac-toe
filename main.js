@@ -28,15 +28,11 @@ function Gameboard() {
     }
     const getBoard = () => board;
 
-  function placeMarker(col, row, player) {
+    function placeMarker(col, row, player) {
+        board[col][row] == val
+        board[col][row] = player;
+        return board;
         
-        if(board[col][row] == val){
-            board[col][row] = player;
-            return board;
-        }else if(board[col][row] == player){
-            const err = 'Invalid move!';
-           return err;
-        }
     }
 
     const logBoard = () => {
@@ -45,7 +41,6 @@ function Gameboard() {
         })
         
     }
-
     return {getBoard, placeMarker, logBoard}
 }
 
@@ -55,12 +50,10 @@ function Player(name, marker){
     const getMarker = () => marker;
 
     return {getName, getMarker};
-    
 }
 
 function GameController(){
     const board = Gameboard();
-
     const playerOne = Player('Jay', 'x');  
     const playerTwo = Player('Franc', 'o');
 
@@ -73,29 +66,44 @@ function GameController(){
     }
     const getActivePlayer = () => activePlayer;
 
-    
     // console.log(activePlayer.getName());
     // console.log(playerOne.getName());
-  
-    const playRound = (col, row) => {
-        board.placeMarker(col, row, activePlayer.getMarker())
-        board.logBoard();
-    }
-    playRound(1, 2);
-    playRound(1, 2);
-    playRound(2, 2);
+    let previousVals = {};
 
-        getActivePlayer();
+    const playRound = (row, col) => {
+    previousVals = [row, col];
+
+        for(const val in previousVals){
+            if(previousVals = [row, col]){                                      
+        //TODO : Create a new private function to check the previous vals then pass the col, row variables to the playRound() from the new function
+                return
+            }
+        }
+ 
+        board.placeMarker(row, col, activePlayer.getMarker())
         switchPlayer();
-        
-    return {getActivePlayer, getBoard : board.getBoard, playRound, switchPlayer, logBoard: board.logBoard}
+        // console.log(previousVals)
+        // board.logBoard();
+    }
     
+    playRound(1, 1);
+    playRound(1, 1);
+    // playRound(1, 2);
+    // playRound(2, 2);
+    // playRound(0,0)
+    return {getActivePlayer, getBoard : board.getBoard, playRound, switchPlayer, logBoard: board.logBoard}
 }
 
 function DisplayController(){
-    const game = GameController();
-    game.getBoard;
- 
+    const game = GameController();     
+    const boardDiv = document.createElement("board");        
+
+    const updateScreen = () => {
+        boardDiv.textContent = 'Yes'
+    }
+
+    //Check connectfour skeleton and understand how to render the data into the document
+
 } 
 DisplayController();
 
