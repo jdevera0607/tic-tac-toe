@@ -27,21 +27,21 @@ function Gameboard() {
         }
     }
     const getBoard = () => board;
+    
 
     function placeMarker(col, row, player) {
-        board[col][row] == val
-        board[col][row] = player;
-        return board;
-        
+        val = player;
+        board[col][row] = val;
     }
+    const getValue = () => val;
 
     const logBoard = () => {
         board.map(function(space, index){
-            console.log(space);
+            // console.log(space);
         })
         
     }
-    return {getBoard, placeMarker, logBoard}
+    return {getBoard, placeMarker, logBoard, getValue}
 }
 
 function Player(name, marker){
@@ -68,42 +68,46 @@ function GameController(){
 
     // console.log(activePlayer.getName());
     // console.log(playerOne.getName());
-    let previousVals = {};
-
+  
     const playRound = (row, col) => {
-    previousVals = [row, col];
-
-        for(const val in previousVals){
-            if(previousVals = [row, col]){                                      
-        //TODO : Create a new private function to check the previous vals then pass the col, row variables to the playRound() from the new function
-                return
-            }
-        }
- 
-        board.placeMarker(row, col, activePlayer.getMarker())
-        switchPlayer();
-        // console.log(previousVals)
-        // board.logBoard();
-    }
     
-    playRound(1, 1);
-    playRound(1, 1);
-    // playRound(1, 2);
-    // playRound(2, 2);
-    // playRound(0,0)
-    return {getActivePlayer, getBoard : board.getBoard, playRound, switchPlayer, logBoard: board.logBoard}
+        board.placeMarker(row, col, activePlayer.getMarker())
+        board.logBoard();
+        switchPlayer();
+        
+    }
+
+    return {getActivePlayer, getBoard : board.getBoard, playRound, switchPlayer, logBoard: board.logBoard, getValue : board.getValue}
 }
 
 function DisplayController(){
     const game = GameController();     
-    const boardDiv = document.createElement("board");        
+    const boardDiv = document.querySelector('.board');        
 
     const updateScreen = () => {
-        boardDiv.textContent = 'Yes'
+        boardDiv.textContent = '';
+        const board = game.getBoard();
+        
+        board.forEach(row => {
+            row.forEach((cell, index) => { 
+                const cellButton = document.createElement("button");
+                cellButton.classList.add("Cell");
+                cellButton.textContent = board.getValue();
+                boardDiv.appendChild(cellButton);
+            
+            })
+        })  
     }
-
-    //Check connectfour skeleton and understand how to render the data into the document
-
+    function clickHandlerBoard(e){
+        // const selectedColumn = e.target.dataset.column;
+        // const selectedRow = e.target.dataset.row;
+       
+    }
+    game.playRound(0, 2);
+    game.playRound(1, 1);
+    game.playRound(1, 2);
+    updateScreen();
+    boardDiv.addEventListener("click", clickHandlerBoard)
 } 
 DisplayController();
 
