@@ -2,7 +2,6 @@
 //The main goal is to store as little global code as possible. 
 //Think carefully about where each of logic should reside. Each little piece of functionality should be able to fit in the game, player, or gameboard objects.
 //wrap gameboard, displaycontroller inside an IIFE.
-//Logic -- 
 //Tic tac toe is a board with 3 columns and 3 rows.
 //X goes first, regardless of the player.
 //Anytime a marker is placed, it should check whether that space in the object array to be empty.
@@ -10,6 +9,12 @@
 //The active player is switched, and so is the marker. The logic repeats until 3 contigious markers is found.
 //if three contigious markers are found, the player with those markers is declared the winner, and the gameboard is reset with empty spaces.
 //The logic repeats.
+
+//Check to see if there are 3 consecutive markers
+//Winning patterns :
+//[0,1,2],[3,4,5],[7,8,9]
+//[0,3,7],[1,4,8],[2,5,9]
+//[0,4,9],[7,4,2]
 
 function Gameboard() {
     const rows = 3;
@@ -26,7 +31,6 @@ function Gameboard() {
         }
     }
     const getBoard = () => board;
-    
 
     function placeMarker(row, col, player) {
         board[row][col].addMarker(player);
@@ -34,14 +38,15 @@ function Gameboard() {
 
     const logBoard = () => {
         board.map(function(space, index){
-            console.log(space);
+            // console.log(space);
         })
         
     }
-    return {getBoard,
-         placeMarker,
-          logBoard
-        }
+    return {
+        getBoard,
+        placeMarker,
+        logBoard
+    }
 }
 function Cell() {
     let value = '';
@@ -52,7 +57,7 @@ function Cell() {
 
     return {
         addMarker,
-         getValue
+        getValue
     }
 }
 
@@ -71,34 +76,49 @@ function GameController(){
     const board = Gameboard();
     const playerOne = Player('Jay', 'x');  
     const playerTwo = Player('Franc', 'o');
-
+    const arrVals = []
     let activePlayer = playerOne;
-
-    // console.log(activePlayer.getName());
 
     const switchPlayer = () => {
         activePlayer = activePlayer == playerOne? playerTwo : playerOne;
     }
     const getActivePlayer = () => activePlayer;
-
-    // console.log(activePlayer.getName());
-    // console.log(playerOne.getName());
   
     const playRound = (row, col) => {
-    
+        arrVals.push(activePlayer.getMarker());
+        console.log(arrVals);
+
         board.placeMarker(row, col, activePlayer.getMarker())
         board.logBoard();
         switchPlayer();
-        
     }
+    const checkWinner = () => {
+        board.getBoard();
 
+        //New winning patterns :
+        [0,1,2],[3,4,5],[7,8,9]
+        [0,3,7],[1,4,8],[2,5,9]
+        [0,4,9],[7,4,2]
+
+        // const winConditions = board[
+        //Horizontal Conditions
+        // [[0][0],[0][1],[0][2]],
+        // [[1][0],[1][1],[1][2]], 
+        // [[2][0],[2][1],[2][2]],
+        //Vertical Conditions
+        // [[0][0],[1][0],[2][0]],
+        // [[0][1],[1][1],[2][1]],
+        // [[0][2],[1][2],[2][2]]
+        // ]
+    }
+   
     return {
         getActivePlayer, 
         getBoard : board.getBoard,
-         playRound, 
-         switchPlayer, 
-         logBoard: board.logBoard
-        }
+        playRound, 
+        switchPlayer, 
+        logBoard: board.logBoard
+    }
 }
 
 function DisplayController(){
@@ -126,14 +146,10 @@ function DisplayController(){
     function clickHandlerBoard(e){
         const selectedColumn = e.target.dataset.column;
         const selectedRow = e.target.dataset.row;
-
         game.playRound(selectedRow, selectedColumn);
         updateScreen();
     }
-    game.playRound(0, 2);
-    game.playRound(1, 1);
-    game.playRound(1, 2);
-   
+
     boardDiv.addEventListener("click", clickHandlerBoard)
     updateScreen();
 } 
