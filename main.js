@@ -16,6 +16,18 @@
 //[0,3,7],[1,4,8],[2,5,9]
 //[0,4,9],[7,4,2]
 
+    //     //New winning patterns:
+    //     // const winConditions = board[
+    //     // //Horizontal Conditions
+    //     // [[0][0],[0][1],[0][2]],
+    //     // [[1][0],[1][1],[1][2]], 
+    //     // [[2][0],[2][1],[2][2]],
+    //     // //Vertical Conditions
+    //     // [[0][0],[1][0],[2][0]],
+    //     // [[0][1],[1][1],[2][1]],
+    //     // [[0][2],[1][2],[2][2]]
+    //     // ]
+
 function Gameboard() {
     const rows = 3;
     const columns = 3;
@@ -35,17 +47,15 @@ function Gameboard() {
     function placeMarker(row, col, player) {
         board[row][col].addMarker(player);
     }
-
+  
     const logBoard = () => {
-        board.map(function(space, index){
-            // console.log(space);
-        })
-        
+    const boardVals = board.map((space) => space.map((cell) => cell.getValue()))
+    // console.log(boardVals);
     }
     return {
         getBoard,
         placeMarker,
-        logBoard
+        logBoard,
     }
 }
 function Cell() {
@@ -76,7 +86,6 @@ function GameController(){
     const board = Gameboard();
     const playerOne = Player('Jay', 'x');  
     const playerTwo = Player('Franc', 'o');
-    const arrVals = []
     let activePlayer = playerOne;
 
     const switchPlayer = () => {
@@ -85,31 +94,21 @@ function GameController(){
     const getActivePlayer = () => activePlayer;
   
     const playRound = (row, col) => {
-        arrVals.push(activePlayer.getMarker());
-        console.log(arrVals);
-
-        board.placeMarker(row, col, activePlayer.getMarker())
+        board.placeMarker(row, col, getActivePlayer().getMarker());
         board.logBoard();
         switchPlayer();
+        checkWinner();
     }
     const checkWinner = () => {
-        board.getBoard();
-
-        //New winning patterns :
-        [0,1,2],[3,4,5],[7,8,9]
-        [0,3,7],[1,4,8],[2,5,9]
-        [0,4,9],[7,4,2]
-
-        // const winConditions = board[
-        //Horizontal Conditions
-        // [[0][0],[0][1],[0][2]],
-        // [[1][0],[1][1],[1][2]], 
-        // [[2][0],[2][1],[2][2]],
-        //Vertical Conditions
-        // [[0][0],[1][0],[2][0]],
-        // [[0][1],[1][1],[2][1]],
-        // [[0][2],[1][2],[2][2]]
-        // ]
+        //Winning conditions
+        const checkBoard = board.getBoard();
+        const boardVals = checkBoard.map((space) => space.map((cell) => cell.getValue()))
+        if(boardVals[0][0] && boardVals[0][1] && boardVals[0][2] == 'x' ||
+        boardVals[0][0] && boardVals[0][1] && boardVals[0][2] == 'o'
+        ){
+            console.log('win');
+        }
+       
     }
    
     return {
@@ -123,8 +122,7 @@ function GameController(){
 
 function DisplayController(){
     const game = GameController();     
-    const boardDiv = document.querySelector('.board');
-    const previousData = [];        
+    const boardDiv = document.querySelector('.board');       
 
     const updateScreen = () => {
         boardDiv.textContent = '';
