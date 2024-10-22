@@ -34,7 +34,7 @@ function Gameboard() {
     }
     const getBoard = () => board;
 
-    function placeMarker(row, col, player) {
+    function placeMarker(row, col, player){
         board[row][col].addMarker(player);
     }
   
@@ -44,8 +44,7 @@ function Gameboard() {
     }
     const clearBoard = () => {
         createBoard();
-        const boardVals = board.map((space) => space.map((cell) => cell.getValue()))
-        console.log(boardVals);
+     
     }
     return {
         createBoard,
@@ -67,7 +66,6 @@ function Cell() {
         getValue
     }
 }
-
 function Player(name, marker){
     const players = [{name, marker}];
     const getName = () => name;
@@ -78,13 +76,11 @@ function Player(name, marker){
         getMarker
     };
 }
-
 function GameController(){
     const board = Gameboard();
     const playerOne = Player('Jay', 'x');  
     const playerTwo = Player('Franc', 'o');
     let activePlayer = playerOne;
-
     board.createBoard();
 
     const switchPlayer = () => {
@@ -96,26 +92,27 @@ function GameController(){
         board.placeMarker(row, col, getActivePlayer().getMarker());
         board.logBoard();
         switchPlayer();
-        checkWinner();
+  
+        // checkWinner();
     }
     const checkWinner = () => {
         //Winning conditions
-        const checkBoard = board.getBoard();
-        const boardVals = checkBoard.map((space) => space.map((cell) => cell.getValue()))
+        // const checkBoard = board.getBoard();
+        // const boardVals = checkBoard.map((space) => space.map((cell) => cell.getValue()))
 
-            // horizontal win conditions
-            // [1][0],[1][1],[1][2] 
-            // [[2][0],[2][1],[2][2]]
-            // //vertical win conditions
-            // [[0][0],[1][0],[2][0]]
-            // [[0][1],[1][1],[2][1]]
-            // [[0][2],[1][2],[2][2]]
+        //     // horizontal win conditions
+        //     // [1][0],[1][1],[1][2] 
+        //     // [[2][0],[2][1],[2][2]]
+        //     // //vertical win conditions
+        //     // [[0][0],[1][0],[2][0]]
+        //     // [[0][1],[1][1],[2][1]]
+        //     // [[0][2],[1][2],[2][2]]
 
-        //if statement hell
+        // //if statement hell
 
-        if(boardVals[0][0] && boardVals[0][1] && boardVals[0][2] === 'x'){
-            console.log('win');
-        }
+        // if(boardVals[0][0] && boardVals[0][1] && boardVals[0][2] === 'x'){
+        //     console.log('win');
+        // }
         //     boardVals[1][0] && boardVals[1][1] && boardVals[1][2] ||
         //     boardVals[2][0] && boardVals[2][1] && boardVals[2][2] ||
 
@@ -143,7 +140,7 @@ function GameController(){
         //     console.log('win')
        
     }
-   
+
     return {
         getActivePlayer, 
         getBoard : board.getBoard,
@@ -162,7 +159,8 @@ function DisplayController(){
     const updateScreen = () => {
         boardDiv.textContent = '';
         const board = game.getBoard();
-        const activePlayer = game.getActivePlayer();
+        const activePlayer = game.getActivePlayer().getName();
+        console.log(`${activePlayer}'s turn`)
 
         let i;
         let j;
@@ -178,14 +176,24 @@ function DisplayController(){
             }
         } 
     }
-
     function clickHandlerBoard(e){
         const selectedColumn = e.target.dataset.column;
         const selectedRow = e.target.dataset.row;
+       
+        if(!selectedRow || !selectedColumn){
+            return;
+        }
         game.playRound(selectedRow, selectedColumn);
         updateScreen();
-    }
 
+        const button = document.querySelectorAll(".cell");
+        for(let i = 0; i < button.length; i++){
+            for(let j = 0; j < button[i]; j++){
+                button[i][j].disabled = true;
+            }
+          
+        }
+    }
     function buttonHandler(e){
         game.clearBoard();
         updateScreen();

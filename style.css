@@ -1,3 +1,12 @@
+*{
+    background-color:   #1e1e2b ;
+}
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+}
 .board{
     display: grid;
     height: 500px;
@@ -7,7 +16,7 @@
     border: 1px solid black;
     gap: 2px;
     padding: 2px;
-    background-color: yellow;
+    background-color: #696969;
 }
 .cell{
     display: flex;
@@ -16,6 +25,7 @@
     text-align: center;
     font-size: 2rem;
     border: 1px solid grey;
-    background: lightyellow;
-    cursor:pointer;
+    background: lightslategray;
+    cursor: pointer;
+    font-size: 2rem;
 }
