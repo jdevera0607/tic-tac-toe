@@ -155,11 +155,14 @@ function DisplayController(){
     const game = GameController();     
     const boardDiv = document.querySelector('.board');    
     const resetBtn = document.querySelector('.reset-btn');   
+    const prevData = [];
+  
 
     const updateScreen = () => {
         boardDiv.textContent = '';
         const board = game.getBoard();
         const activePlayer = game.getActivePlayer().getName();
+       
         console.log(`${activePlayer}'s turn`)
 
         let i;
@@ -179,28 +182,35 @@ function DisplayController(){
     function clickHandlerBoard(e){
         const selectedColumn = e.target.dataset.column;
         const selectedRow = e.target.dataset.row;
-       
+        const newData = [{selectedRow, selectedColumn}];
+
+        if(prevData.length == 0){
+            prevData.push({selectedRow, selectedColumn});
+        }
+        for(let i = 0; i < prevData.length; i++){
+            if(prevData[i] == ({selectedRow, selectedColumn})){
+                console.log('no')
+            }else{
+                prevData.push({selectedRow, selectedColumn})
+            }
+        }
+        console.log(prevData)
+     
         if(!selectedRow || !selectedColumn){
             return;
         }
         game.playRound(selectedRow, selectedColumn);
         updateScreen();
-
-        const button = document.querySelectorAll(".cell");
-        for(let i = 0; i < button.length; i++){
-            for(let j = 0; j < button[i]; j++){
-                button[i][j].disabled = true;
-            }
-          
-        }
     }
+
     function buttonHandler(e){
         game.clearBoard();
         updateScreen();
     }
     resetBtn.addEventListener("click", buttonHandler);
     boardDiv.addEventListener("click", clickHandlerBoard)
-    updateScreen();
+  
+    updateScreen(); 
 } 
 DisplayController();
 
