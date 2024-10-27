@@ -34,21 +34,30 @@ function Gameboard() {
     }
     const getBoard = () => board;
 
+    function checkBoard(row, col, player) {
+        const check = board[row][col].getValue();
+        if(check == 'x' || check == 'o'){
+            return false;
+        }else{
+            placeMarker(row, col, player);
+        }
+    }
+
     function placeMarker(row, col, player){
         board[row][col].addMarker(player);
     }
   
     const logBoard = () => {
-    // const boardVals = board.map((space) => space.map((cell) => cell.getValue()))
-    // console.log(boardVals);
+        const boardVals = board.map((space) => space.map((cell) => cell.getValue()))
+        console.log(boardVals);
     }
     const clearBoard = () => {
         createBoard();
-     
     }
     return {
         createBoard,
         getBoard,
+        checkBoard,
         placeMarker,
         logBoard,
         clearBoard,
@@ -57,7 +66,7 @@ function Gameboard() {
 function Cell() {
     let value = '';
     const addMarker = (player) => {
-        value = player;
+      value = player;
     };
     const getValue = () => value;
 
@@ -81,32 +90,104 @@ function GameController(){
     const playerOne = Player('Jay', 'x');  
     const playerTwo = Player('Franc', 'o');
     let activePlayer = playerOne;
-    board.createBoard();
 
+    board.createBoard();
+    const resetPlayer = () => {
+        activePlayer = playerOne;
+    }
     const switchPlayer = () => {
         activePlayer = activePlayer == playerOne? playerTwo : playerOne;
     }
     const getActivePlayer = () => activePlayer;
   
     const playRound = (row, col) => {
-        board.placeMarker(row, col, getActivePlayer().getMarker());
-        board.logBoard();
+        const boardChecker = board.checkBoard(row, col, getActivePlayer().getMarker());
+        if(boardChecker == false){
+            console.log('invalid move!')
+            switchPlayer();
+        }
+        // board.logBoard();
         switchPlayer();
   
         // checkWinner();
     }
     const checkWinner = () => {
         //Winning conditions
-        // const checkBoard = board.getBoard();
-        // const boardVals = checkBoard.map((space) => space.map((cell) => cell.getValue()))
+        const array = [
+         // horizontal win conditions
+         [0][0],[0][1],[0][2]
+         [1][0],[1][1],[1][2] 
+         [2][0],[2][1],[2][2]
+         //vertical win conditions
+         [0][0],[1][0],[2][0]
+         [0][1],[1][1],[2][1]
+         [0][2],[1][2],[2][2]
+         //diagnol win conditions
+         [0][0],[1][1],[2][2]
+         [0][2],[1][1],[2][0]
+        ]
+    [['jay']['franc']] = array;
+    }
+    return {
+        getActivePlayer, 
+        getBoard : board.getBoard,
+        playRound, 
+        switchPlayer, 
+        logBoard: board.logBoard,
+        clearBoard : board.clearBoard,
+        resetPlayer,
+    }
+}
 
-        //     // horizontal win conditions
-        //     // [1][0],[1][1],[1][2] 
-        //     // [[2][0],[2][1],[2][2]]
-        //     // //vertical win conditions
-        //     // [[0][0],[1][0],[2][0]]
-        //     // [[0][1],[1][1],[2][1]]
-        //     // [[0][2],[1][2],[2][2]]
+function DisplayController(){
+    const game = GameController();     
+    const boardDiv = document.querySelector('.board');    
+    const resetBtn = document.querySelector('.reset-btn');   
+  
+    const updateScreen = () => {
+        boardDiv.textContent = '';
+        const board = game.getBoard();
+        const activePlayer = game.getActivePlayer().getName();
+       
+        console.log(`${activePlayer}'s turn`)
+
+        let i;
+        let j;
+
+        for( i = 0; i < board.length; i++){
+            for( j = 0; j < board[i].length; j++) {
+                cellButton = document.createElement("button");
+                cellButton.classList.add("cell");
+                cellButton.textContent = board[i][j].getValue();
+                cellButton.dataset.column = j;
+                cellButton.dataset.row = i;
+                boardDiv.appendChild(cellButton);
+            }
+        } 
+    }
+    function clickHandlerBoard(e){
+        const selectedColumn = e.target.dataset.column;
+        const selectedRow = e.target.dataset.row;
+
+        if(!selectedRow || !selectedColumn){
+            return;
+        }
+        game.playRound(selectedRow, selectedColumn);
+        updateScreen();
+    }
+
+    function buttonHandler(e){
+        game.clearBoard();
+        game.resetPlayer();
+        updateScreen();
+    }
+    resetBtn.addEventListener("click", buttonHandler);
+    boardDiv.addEventListener("click", clickHandlerBoard)
+  
+    updateScreen(); 
+} 
+DisplayController();
+
 
         // //if statement hell
 
@@ -138,79 +219,3 @@ function GameController(){
         //     boardVals[0][2] && boardVals[1][1] && boardVals[2][0]  === 'o'  
         // ){
         //     console.log('win')
-       
-    }
-
-    return {
-        getActivePlayer, 
-        getBoard : board.getBoard,
-        playRound, 
-        switchPlayer, 
-        logBoard: board.logBoard,
-        clearBoard : board.clearBoard,
-    }
-}
-
-function DisplayController(){
-    const game = GameController();     
-    const boardDiv = document.querySelector('.board');    
-    const resetBtn = document.querySelector('.reset-btn');   
-    const prevData = [];
-  
-
-    const updateScreen = () => {
-        boardDiv.textContent = '';
-        const board = game.getBoard();
-        const activePlayer = game.getActivePlayer().getName();
-       
-        console.log(`${activePlayer}'s turn`)
-
-        let i;
-        let j;
-
-        for( i = 0; i < board.length; i++){
-            for( j = 0; j < board[i].length; j++) {
-                cellButton = document.createElement("button");
-                cellButton.classList.add("cell");
-                cellButton.textContent = board[i][j].getValue();
-                cellButton.dataset.column = j;
-                cellButton.dataset.row = i;
-                boardDiv.appendChild(cellButton);
-            }
-        } 
-    }
-    function clickHandlerBoard(e){
-        const selectedColumn = e.target.dataset.column;
-        const selectedRow = e.target.dataset.row;
-        const newData = [{selectedRow, selectedColumn}];
-
-        if(prevData.length == 0){
-            prevData.push({selectedRow, selectedColumn});
-        }
-        for(let i = 0; i < prevData.length; i++){
-            if(prevData[i] == ({selectedRow, selectedColumn})){
-                console.log('no')
-            }else{
-                prevData.push({selectedRow, selectedColumn})
-            }
-        }
-        console.log(prevData)
-     
-        if(!selectedRow || !selectedColumn){
-            return;
-        }
-        game.playRound(selectedRow, selectedColumn);
-        updateScreen();
-    }
-
-    function buttonHandler(e){
-        game.clearBoard();
-        updateScreen();
-    }
-    resetBtn.addEventListener("click", buttonHandler);
-    boardDiv.addEventListener("click", clickHandlerBoard)
-  
-    updateScreen(); 
-} 
-DisplayController();
-
