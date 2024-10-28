@@ -75,6 +75,49 @@ function Cell() {
         getValue
     }
 }
+
+function formCreation(){
+    const createForm = () => {
+        const form = document.createElement('form');
+        form.id = 'playerNames'
+        document.body.appendChild(form);
+    
+        const playerOne = document.createElement('input')
+        playerOne.type = 'text';
+        playerOne.name = 'playerOne';
+        playerOne.placeholder = 'John';
+        form.appendChild(playerOne);
+    
+        const playerTwo = document.createElement('input')
+        playerTwo.type = 'text';
+        playerTwo.name = 'playerTwo';
+        playerTwo.placeholder = 'Jane';
+        form.appendChild(playerTwo);
+    
+        const button = document.createElement('button');
+        button.type = 'submit';
+        button.textContent = 'Start!'
+        form.appendChild(button);
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const playerOneName = formData.get('playerOne');
+            const playerTwoName = formData.get('playerTwo');
+
+            returnPlayerOne(playerOneName);
+            returnPlayerTwo(playerTwoName);
+
+            DisplayController();
+
+        }) 
+    }
+    const returnPlayerOne  = (playerOneName) => {playerOneName;}
+    const returnPlayerTwo = (playerTwoName) => {playerTwoName};
+    console.log(returnPlayerOne.playerOneName);
+
+    return{createForm, returnPlayerOne, returnPlayerTwo}
+}
 function Player(name, marker){
     const players = [{name, marker}];
     const getName = () => name;
@@ -140,7 +183,14 @@ function GameController(){
 }
 
 function DisplayController(){
-    const game = GameController();     
+    const form = formCreation();
+
+    const playerOne = form.returnPlayerOne();
+    const playerTwo = form.returnPlayerTwo();
+
+    console.log(playerOne);
+
+    const game = GameController();
     const boardDiv = document.querySelector('.board');    
     const resetBtn = document.querySelector('.reset-btn');   
   
@@ -186,8 +236,9 @@ function DisplayController(){
   
     updateScreen(); 
 } 
-DisplayController();
-
+// DisplayController();
+const formCreate = formCreation();
+formCreate.createForm();
 
         // //if statement hell
 
