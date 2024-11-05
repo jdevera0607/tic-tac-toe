@@ -23,7 +23,6 @@ function Gameboard() {
 
     let rowIndex;
     let colIndex;
-
     const createBoard = () => {
         for(rowIndex = 0; rowIndex < rows; rowIndex++){
             board[rowIndex] = []
@@ -35,8 +34,8 @@ function Gameboard() {
     const getBoard = () => board;
 
     function checkBoard(row, col, player) {
-        const check = board[row][col].getValue();
-        if(check == 'x' || check == 'o'){
+        const cell = board[row][col].getValue();
+        if(cell == 'x' || cell == 'o'){
             return false;
         }else{
             placeMarker(row, col, player);
@@ -47,9 +46,9 @@ function Gameboard() {
         board[row][col].addMarker(player);
     }
   
-    const logBoard = () => {
+    const mapBoard = () => {
         const boardVals = board.map((space) => space.map((cell) => cell.getValue()))
-        console.log(boardVals);
+        //console.log(boardVals); - logs the board values for testing purposes
     }
     const clearBoard = () => {
         createBoard();
@@ -59,7 +58,7 @@ function Gameboard() {
         getBoard,
         checkBoard,
         placeMarker,
-        logBoard,
+        mapBoard,
         clearBoard,
     }
 }
@@ -76,8 +75,11 @@ function Cell() {
     }
 }
 
-function formCreation(){
-    const createForm = () => {
+const formCreation = (function() {
+    const players = [];
+    const getPlayers = () => players;
+    const newPlayerForm = () => {
+
         const form = document.createElement('form');
         form.id = 'playerNames'
         document.body.appendChild(form);
@@ -104,35 +106,42 @@ function formCreation(){
             const formData = new FormData(form);
             const playerOneName = formData.get('playerOne');
             const playerTwoName = formData.get('playerTwo');
-
-            returnPlayerOne(playerOneName);
-            returnPlayerTwo(playerTwoName);
-
-            DisplayController();
-
-        }) 
+            if(playerOneName === '' && playerTwoName === ''){
+                alert('Please insert names for players!')
+            }else if(playerOneName === ''){
+                alert('Player One has no name!');
+            }else if(playerTwoName === ''){
+                alert('Player Two has no name!');
+            }
+            else{
+                players.push(playerOneName, playerTwoName);
+                DisplayController();
+            }
+        })
     }
-    const returnPlayerOne  = (playerOneName) => {playerOneName;}
-    const returnPlayerTwo = (playerTwoName) => {playerTwoName};
-    console.log(returnPlayerOne.playerOneName);
-
-    return{createForm, returnPlayerOne, returnPlayerTwo}
-}
+    newPlayerForm();
+    return {
+        getPlayers,
+    }
+})();
 function Player(name, marker){
-    const players = [{name, marker}];
     const getName = () => name;
     const getMarker = () => marker;
-
-    return {
+  
+     return {
         getName,
         getMarker
-    };
+     };
 }
 function GameController(){
     const board = Gameboard();
-    const playerOne = Player('Jay', 'x');  
-    const playerTwo = Player('Franc', 'o');
+    const players = (formCreation.getPlayers());
+
+    const playerOne = Player(players[0], 'x');
+    const playerTwo = Player(players[1], 'o');
+
     let activePlayer = playerOne;
+    let counter = 0;
 
     board.createBoard();
     const resetPlayer = () => {
@@ -144,52 +153,50 @@ function GameController(){
     const getActivePlayer = () => activePlayer;
   
     const playRound = (row, col) => {
+        const round = 0;
         const boardChecker = board.checkBoard(row, col, getActivePlayer().getMarker());
         if(boardChecker == false){
             console.log('invalid move!')
             switchPlayer();
         }
-        // board.logBoard();
+        board.mapBoard();
         switchPlayer();
-  
-        // checkWinner();
+        checkWinner();
     }
     const checkWinner = () => {
+        const board = board.getBoard();
+        let winner = null;
+        counter++;
+        console.log(counter);
         //Winning conditions
-        const array = [
-         // horizontal win conditions
-         [0][0],[0][1],[0][2]
-         [1][0],[1][1],[1][2] 
-         [2][0],[2][1],[2][2]
-         //vertical win conditions
-         [0][0],[1][0],[2][0]
-         [0][1],[1][1],[2][1]
-         [0][2],[1][2],[2][2]
-         //diagnol win conditions
-         [0][0],[1][1],[2][2]
-         [0][2],[1][1],[2][0]
-        ]
-    [['jay']['franc']] = array;
+
+        // horizontal win conditions
+        // [0][0],[0][1],[0][2]
+        //  [1][0],[1][1],[1][2] 
+        //  [2][0],[2][1],[2][2]
+        //  //vertical win conditions
+        //  [0][0],[1][0],[2][0]
+        //  [0][1],[1][1],[2][1]
+        //  [0][2],[1][2],[2][2]
+        //  //diagnol win conditions
+        //  [0][0],[1][1],[2][2]
+        //  [0][2],[1][1],[2][0]
+    //   if(array == playerOne){
+    //     console.log('winner');
+    //   }
     }
     return {
         getActivePlayer, 
         getBoard : board.getBoard,
         playRound, 
         switchPlayer, 
-        logBoard: board.logBoard,
+        mapBoard: board.mapBoard,
         clearBoard : board.clearBoard,
         resetPlayer,
     }
 }
 
 function DisplayController(){
-    const form = formCreation();
-
-    const playerOne = form.returnPlayerOne();
-    const playerTwo = form.returnPlayerTwo();
-
-    console.log(playerOne);
-
     const game = GameController();
     const boardDiv = document.querySelector('.board');    
     const resetBtn = document.querySelector('.reset-btn');   
@@ -236,37 +243,34 @@ function DisplayController(){
   
     updateScreen(); 
 } 
-// DisplayController();
-const formCreate = formCreation();
-formCreate.createForm();
 
-        // //if statement hell
+//         // //if statement hell
 
-        // if(boardVals[0][0] && boardVals[0][1] && boardVals[0][2] === 'x'){
-        //     console.log('win');
-        // }
-        //     boardVals[1][0] && boardVals[1][1] && boardVals[1][2] ||
-        //     boardVals[2][0] && boardVals[2][1] && boardVals[2][2] ||
+//         // if(boardVals[0][0] && boardVals[0][1] && boardVals[0][2] === 'x'){
+//         //     console.log('win');
+//         // }
+//         //     boardVals[1][0] && boardVals[1][1] && boardVals[1][2] ||
+//         //     boardVals[2][0] && boardVals[2][1] && boardVals[2][2] ||
 
-        //     boardVals[0][0] && boardVals[1][0] && boardVals[2][0] ||
-        //     boardVals[0][1] && boardVals[1][1] && boardVals[2][1] ||
-        //     boardVals[0][2] && boardVals[1][2] && boardVals[2][2] ||
+//         //     boardVals[0][0] && boardVals[1][0] && boardVals[2][0] ||
+//         //     boardVals[0][1] && boardVals[1][1] && boardVals[2][1] ||
+//         //     boardVals[0][2] && boardVals[1][2] && boardVals[2][2] ||
 
-        //     boardVals[0][0] && boardVals[1][1] && boardVals[2][2] ||
-        //     boardVals[0][2] && boardVals[1][1] && boardVals[2][0]  
-        // ){
-        //     console.log('win');
-        // }
-        // else if(
-        //     boardVals[0][0] && boardVals[0][1] && boardVals[0][2] ||
-        //     boardVals[1][0] && boardVals[1][1] && boardVals[1][2] ||
-        //     boardVals[2][0] && boardVals[2][1] && boardVals[2][2] ||
+//         //     boardVals[0][0] && boardVals[1][1] && boardVals[2][2] ||
+//         //     boardVals[0][2] && boardVals[1][1] && boardVals[2][0]  
+//         // ){
+//         //     console.log('win');
+//         // }
+//         // else if(
+//         //     boardVals[0][0] && boardVals[0][1] && boardVals[0][2] ||
+//         //     boardVals[1][0] && boardVals[1][1] && boardVals[1][2] ||
+//         //     boardVals[2][0] && boardVals[2][1] && boardVals[2][2] ||
 
-        //     boardVals[0][0] && boardVals[1][0] && boardVals[2][0] ||
-        //     boardVals[0][1] && boardVals[1][1] && boardVals[2][1] ||
-        //     boardVals[0][2] && boardVals[1][2] && boardVals[2][2] ||
+//         //     boardVals[0][0] && boardVals[1][0] && boardVals[2][0] ||
+//         //     boardVals[0][1] && boardVals[1][1] && boardVals[2][1] ||
+//         //     boardVals[0][2] && boardVals[1][2] && boardVals[2][2] ||
 
-        //     boardVals[0][0] && boardVals[1][1] && boardVals[2][2] ||
-        //     boardVals[0][2] && boardVals[1][1] && boardVals[2][0]  === 'o'  
-        // ){
-        //     console.log('win')
+//         //     boardVals[0][0] && boardVals[1][1] && boardVals[2][2] ||
+//         //     boardVals[0][2] && boardVals[1][1] && boardVals[2][0]  === 'o'  
+//         // ){
+//         //     console.log('win')
