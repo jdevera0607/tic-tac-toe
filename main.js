@@ -17,13 +17,18 @@
 //[0,4,9],[7,4,2]
 
 function Gameboard() {
-    const rows = 3;
-    const columns = 3;
     const board = [];
+
+    const getRows = () => 3;
+    const getCols = () => 3;
+    
 
     let rowIndex;
     let colIndex;
     const createBoard = () => {
+        const rows = getRows();
+        const columns = getCols();
+
         for(rowIndex = 0; rowIndex < rows; rowIndex++){
             board[rowIndex] = []
             for(colIndex = 0; colIndex < columns; colIndex++){
@@ -35,7 +40,7 @@ function Gameboard() {
 
     function checkBoard(row, col, player) {
         const cell = board[row][col].getValue();
-        if(cell == 'x' || cell == 'o'){
+        if(cell === 'x' || cell === 'o'){
             return false;
         }else{
             placeMarker(row, col, player);
@@ -48,12 +53,15 @@ function Gameboard() {
   
     const mapBoard = () => {
         const boardVals = board.map((space) => space.map((cell) => cell.getValue()))
+        return boardVals;
         //console.log(boardVals); - logs the board values for testing purposes
     }
     const clearBoard = () => {
         createBoard();
     }
     return {
+        getCols,
+        getRows,
         createBoard,
         getBoard,
         checkBoard,
@@ -103,6 +111,7 @@ const formCreation = (function() {
 
         button.addEventListener("click", (e) => {
             e.preventDefault();
+            form.classList.add("hide")
             const formData = new FormData(form);
             const playerOneName = formData.get('playerOne');
             const playerTwoName = formData.get('playerTwo');
@@ -141,7 +150,7 @@ function GameController(){
     const playerTwo = Player(players[1], 'o');
 
     let activePlayer = playerOne;
-    let counter = 0;
+    let winner = null;
 
     board.createBoard();
     const resetPlayer = () => {
@@ -153,37 +162,126 @@ function GameController(){
     const getActivePlayer = () => activePlayer;
   
     const playRound = (row, col) => {
-        const round = 0;
-        const boardChecker = board.checkBoard(row, col, getActivePlayer().getMarker());
+        let playerOneWins = 0;
+        let playerTwoWins = 0;
+
+        activePlayer = getActivePlayer();
+        const boardChecker = board.checkBoard(row, col, activePlayer.getMarker());
         if(boardChecker == false){
             console.log('invalid move!')
-            switchPlayer();
+            switchPlayer();                         //forces player to switch to ensure that a player that makes an invalid move still has a turn.
         }
         board.mapBoard();
         switchPlayer();
-        checkWinner();
+        let marker = activePlayer.getMarker();
+        const roundCheck = checkWinner(row, col);
+        if(roundCheck === playerOne){
+            playerOneWins++
+            return {playerOneWins, roundCheck};
+        }
+        if(roundCheck === playerTwo){
+            playerTwoWins++;
+            return {playerTwoWins, roundCheck};
+        }
     }
-    const checkWinner = () => {
-        const board = board.getBoard();
-        let winner = null;
-        counter++;
-        console.log(counter);
-        //Winning conditions
+    const checkWinner = (row, col) => {
+        const boardVals = board.mapBoard();
+        const cols = board.getCols();
+        const rows = board.getRows();
 
-        // horizontal win conditions
-        // [0][0],[0][1],[0][2]
-        //  [1][0],[1][1],[1][2] 
-        //  [2][0],[2][1],[2][2]
-        //  //vertical win conditions
-        //  [0][0],[1][0],[2][0]
-        //  [0][1],[1][1],[2][1]
-        //  [0][2],[1][2],[2][2]
-        //  //diagnol win conditions
-        //  [0][0],[1][1],[2][2]
-        //  [0][2],[1][1],[2][0]
-    //   if(array == playerOne){
-    //     console.log('winner');
-    //   }
+        let countX = 0;
+        let countO = 0;
+
+        for(let c = 0; c < cols; c++){      //Horizontal check using counter
+            if(boardVals[row][c]  === 'x'){
+                countX++
+            }
+            
+            else if(boardVals[row][c] === 'o'){
+                countO++;
+            }else{
+                countX = 0;
+                countO = 0;
+            }
+            if(countX === 3){
+                console.log('Player One Wins!')
+                winner = playerOne;
+                return winner;
+            } 
+            else if(countO === 3){
+                console.log('Player Two Wins!')
+                winner = playerTwo;
+                return winner;
+            }
+        } 
+        countX = 0;
+        countO = 0;
+        for(let r = 0; r < rows; r++){
+            if(boardVals[r][col] === 'x'){      //Vertical check using counter
+                countX++;
+            }else if(boardVals[r][col] === 'o'){
+                countO++;
+            }else {
+                countX = 0;
+                countO = 0;
+            }
+            if(countX === 3){
+                console.log('Player One Wins!')
+                winner = playerOne;
+                return winner;
+            }
+            else if(countO === 3){
+                console.log('Player Two Wins!')
+                winner = playerTwo;
+                return winner;
+            } 
+            
+        }
+        countX = 0;
+        countO = 0;
+        for(let r = 0; r < rows; r++){
+            let c = row + col - r;
+            if(c >= 0 && c < cols && boardVals[r][c] === 'x'){
+                countX++;
+            }else if(c >= 0 && c < cols && boardVals[r][c] === 'o'){
+                countO++;
+            }else {
+                countX = 0;
+                countO = 0;
+            }
+            if(countX === 3){
+                console.log('Player One Wins!')
+                winner = playerOne;
+                return winner;
+            } 
+            else if(countO === 3){
+                console.log('Player Two Wins!')
+                winner = playerTwo;
+                return winner;
+            }
+        }
+        for(let r = 0; r < rows; r++){
+            let c = col - row + r;
+            if(c >= 0 && c < cols && boardVals[r][c] === 'x'){
+                countX++;
+            }else if(c >= 0 && c < cols && boardVals[r][c] === 'o'){
+                countO++;
+            }else {
+                countX = 0;
+                countO = 0;
+            }
+            if(countX === 3){
+                console.log('Player One Wins!')
+                winner = playerOne;
+                return winner;
+            } 
+            else if(countO === 3){
+                console.log('Player Two Wins!')
+                winner = playerTwo;
+                return winner;
+            }
+        }
+       return false;
     }
     return {
         getActivePlayer, 
@@ -229,8 +327,12 @@ function DisplayController(){
         if(!selectedRow || !selectedColumn){
             return;
         }
-        game.playRound(selectedRow, selectedColumn);
+        const winDisplay = game.playRound(selectedRow, selectedColumn);
+        displayWinner(winDisplay);
         updateScreen();
+    }
+    function displayWinner(winner){
+        console.log(winner.roundCheck)
     }
 
     function buttonHandler(e){
@@ -243,34 +345,3 @@ function DisplayController(){
   
     updateScreen(); 
 } 
-
-//         // //if statement hell
-
-//         // if(boardVals[0][0] && boardVals[0][1] && boardVals[0][2] === 'x'){
-//         //     console.log('win');
-//         // }
-//         //     boardVals[1][0] && boardVals[1][1] && boardVals[1][2] ||
-//         //     boardVals[2][0] && boardVals[2][1] && boardVals[2][2] ||
-
-//         //     boardVals[0][0] && boardVals[1][0] && boardVals[2][0] ||
-//         //     boardVals[0][1] && boardVals[1][1] && boardVals[2][1] ||
-//         //     boardVals[0][2] && boardVals[1][2] && boardVals[2][2] ||
-
-//         //     boardVals[0][0] && boardVals[1][1] && boardVals[2][2] ||
-//         //     boardVals[0][2] && boardVals[1][1] && boardVals[2][0]  
-//         // ){
-//         //     console.log('win');
-//         // }
-//         // else if(
-//         //     boardVals[0][0] && boardVals[0][1] && boardVals[0][2] ||
-//         //     boardVals[1][0] && boardVals[1][1] && boardVals[1][2] ||
-//         //     boardVals[2][0] && boardVals[2][1] && boardVals[2][2] ||
-
-//         //     boardVals[0][0] && boardVals[1][0] && boardVals[2][0] ||
-//         //     boardVals[0][1] && boardVals[1][1] && boardVals[2][1] ||
-//         //     boardVals[0][2] && boardVals[1][2] && boardVals[2][2] ||
-
-//         //     boardVals[0][0] && boardVals[1][1] && boardVals[2][2] ||
-//         //     boardVals[0][2] && boardVals[1][1] && boardVals[2][0]  === 'o'  
-//         // ){
-//         //     console.log('win')

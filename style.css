@@ -1,11 +1,11 @@
 *{
+    color: whitesmoke;
     background-color:   #1e1e2b ;
 }
 body{
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
 }
 .board{
     display: grid;
@@ -17,15 +17,18 @@ body{
     gap: 2px;
     padding: 2px;
     background-color: #696969;
+    color: white;
 }
 .cell{
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
-    font-size: 2rem;
     border: 1px solid grey;
     background: lightslategray;
     cursor: pointer;
     font-size: 2rem;
+}
+.hide{
+    display: none;
 }
