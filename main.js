@@ -28,7 +28,6 @@ function Gameboard() {
     const createBoard = () => {
         const rows = getRows();
         const columns = getCols();
-
         for(rowIndex = 0; rowIndex < rows; rowIndex++){
             board[rowIndex] = []
             for(colIndex = 0; colIndex < columns; colIndex++){
@@ -56,9 +55,7 @@ function Gameboard() {
         return boardVals;
         //console.log(boardVals); - logs the board values for testing purposes
     }
-    const clearBoard = () => {
-        createBoard();
-    }
+ 
     return {
         getCols,
         getRows,
@@ -67,7 +64,6 @@ function Gameboard() {
         checkBoard,
         placeMarker,
         mapBoard,
-        clearBoard,
     }
 }
 function Cell() {
@@ -104,17 +100,18 @@ const formCreation = (function() {
         playerTwo.placeholder = 'Jane';
         form.appendChild(playerTwo);
     
-        const button = document.createElement('button');
-        button.type = 'submit';
-        button.textContent = 'Start!'
-        form.appendChild(button);
+        const submitBtn = document.createElement('button');
+        submitBtn.type = 'submit';
+        submitBtn.textContent = 'Start!'
+        form.appendChild(submitBtn);
 
-        button.addEventListener("click", (e) => {
+        submitBtn.addEventListener("click", (e) => {
             e.preventDefault();
             form.classList.add("hide")
             const formData = new FormData(form);
             const playerOneName = formData.get('playerOne');
             const playerTwoName = formData.get('playerTwo');
+
             if(playerOneName === '' && playerTwoName === ''){
                 alert('Please insert names for players!')
             }else if(playerOneName === ''){
@@ -133,6 +130,7 @@ const formCreation = (function() {
         getPlayers,
     }
 })();
+
 function Player(name, marker){
     const getName = () => name;
     const getMarker = () => marker;
@@ -142,17 +140,16 @@ function Player(name, marker){
         getMarker
      };
 }
-function GameController(){
-    const board = Gameboard();
-    const players = (formCreation.getPlayers());
 
+function GameController(){
+    const players = (formCreation.getPlayers());
     const playerOne = Player(players[0], 'x');
     const playerTwo = Player(players[1], 'o');
+    const board = Gameboard();
 
     let activePlayer = playerOne;
-    let winner = null;
-
     board.createBoard();
+
     const resetPlayer = () => {
         activePlayer = playerOne;
     }
@@ -162,33 +159,31 @@ function GameController(){
     const getActivePlayer = () => activePlayer;
   
     const playRound = (row, col) => {
-        let playerOneWins = 0;
-        let playerTwoWins = 0;
-
         activePlayer = getActivePlayer();
-        const boardChecker = board.checkBoard(row, col, activePlayer.getMarker());
+        let marker = activePlayer.getMarker();
+        const boardChecker = board.checkBoard(row, col, marker);
+
         if(boardChecker == false){
             console.log('invalid move!')
             switchPlayer();                         //forces player to switch to ensure that a player that makes an invalid move still has a turn.
         }
+
         board.mapBoard();
         switchPlayer();
-        let marker = activePlayer.getMarker();
-        const roundCheck = checkWinner(row, col);
-        if(roundCheck === playerOne){
-            playerOneWins++
-            return {playerOneWins, roundCheck};
+
+        const winner = checkWinner(row, col);
+        if(winner !== false){
+            returnWinner(winner);
+            resetPlayer();
+            return true;
         }
-        if(roundCheck === playerTwo){
-            playerTwoWins++;
-            return {playerTwoWins, roundCheck};
-        }
+        return false;
     }
     const checkWinner = (row, col) => {
         const boardVals = board.mapBoard();
         const cols = board.getCols();
         const rows = board.getRows();
-
+    
         let countX = 0;
         let countO = 0;
 
@@ -216,6 +211,7 @@ function GameController(){
         } 
         countX = 0;
         countO = 0;
+
         for(let r = 0; r < rows; r++){
             if(boardVals[r][col] === 'x'){      //Vertical check using counter
                 countX++;
@@ -239,6 +235,7 @@ function GameController(){
         }
         countX = 0;
         countO = 0;
+
         for(let r = 0; r < rows; r++){
             let c = row + col - r;
             if(c >= 0 && c < cols && boardVals[r][c] === 'x'){
@@ -260,6 +257,9 @@ function GameController(){
                 return winner;
             }
         }
+        countX = 0;
+        countO = 0;
+
         for(let r = 0; r < rows; r++){
             let c = col - row + r;
             if(c >= 0 && c < cols && boardVals[r][c] === 'x'){
@@ -281,28 +281,36 @@ function GameController(){
                 return winner;
             }
         }
-       return false;
+        return false;
     }
+    const returnWinner = (winner) => winner
+
     return {
         getActivePlayer, 
         getBoard : board.getBoard,
         playRound, 
         switchPlayer, 
         mapBoard: board.mapBoard,
-        clearBoard : board.clearBoard,
+        createBoard : board.createBoard,
         resetPlayer,
+        returnWinner
     }
 }
 
 function DisplayController(){
     const game = GameController();
     const boardDiv = document.querySelector('.board');    
-    const resetBtn = document.querySelector('.reset-btn');   
+    const resetBtn = document.createElement('button');
+    resetBtn.value = 'reset'
+    resetBtn.textContent = 'reset'
+    resetBtn.classList.add('reset-btn');
+  
   
     const updateScreen = () => {
         boardDiv.textContent = '';
         const board = game.getBoard();
         const activePlayer = game.getActivePlayer().getName();
+      
        
         console.log(`${activePlayer}'s turn`)
 
@@ -317,8 +325,10 @@ function DisplayController(){
                 cellButton.dataset.column = j;
                 cellButton.dataset.row = i;
                 boardDiv.appendChild(cellButton);
+               
             }
         } 
+        boardDiv.append(resetBtn)
     }
     function clickHandlerBoard(e){
         const selectedColumn = e.target.dataset.column;
@@ -327,20 +337,23 @@ function DisplayController(){
         if(!selectedRow || !selectedColumn){
             return;
         }
-        const winDisplay = game.playRound(selectedRow, selectedColumn);
-        displayWinner(winDisplay);
-        updateScreen();
-    }
-    function displayWinner(winner){
-        console.log(winner.roundCheck)
-    }
+       const roundStart = game.playRound(selectedRow, selectedColumn);
 
-    function buttonHandler(e){
-        game.clearBoard();
+       if( roundStart === true){ //checks true if the round has a winner
+            displayWinner();
+       }
+       updateScreen();
+    }
+    function displayWinner(){
+        const getWinner = game.returnWinner();
+        const h2 = document.createElement('h2');
+    }
+    function resetButton(e){
+        game.createBoard();
         game.resetPlayer();
         updateScreen();
     }
-    resetBtn.addEventListener("click", buttonHandler);
+    resetBtn.addEventListener("click", resetButton);
     boardDiv.addEventListener("click", clickHandlerBoard)
   
     updateScreen(); 
