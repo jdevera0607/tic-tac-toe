@@ -266,8 +266,6 @@ function GameController(){
                 return winner;
             }
         }
-      
-
         for(let r = 0; r < rows; r++){
             let c = col + row - r;
             if (c >= 0 && c < cols && boardVals[r][c] === 'x'){
@@ -331,7 +329,36 @@ function DisplayController(){
     const game = GameController();
     const boardDiv = document.querySelector('.board');
 
-    const createDelButton = (function()  {
+    function scoreBoard() {
+        const createScoreBoard = () => {
+            const winnerH2 = document.createElement('h2');
+            const getWinnerH2 = () => winnerH2
+            winnerH2.classList.add('winnerh2');
+            const p1Counter = document.createElement('h3');
+            p1Counter.classList.add('p1counter');
+            const p2Counter = document.createElement('h3');
+            p2Counter.classList.add('p2counter');
+        }
+        const displayScoreBoard = () => {
+            const winCounterEl = document.querySelector('.wincounter');
+            const getWinner = game.returnWinner();
+            let p1Wins = game.getPlayerOneWins();
+            let p2Wins = game.getPlayerTwoWins();
+    
+            winnerH2.textContent = `The winner of this round is ${getWinner}`;
+            p1Counter.textContent = `Player One Wins: ${p1Wins}`;
+            p2Counter.textContent = `Player Two Wins: ${p2Wins}`;
+            
+            document.body.appendChild(getWinnerH2);
+            winCounterEl.appendChild(getP1Counter);
+            winCounterEl.appendChild(getP2Counter);
+        }
+        return {
+            createScoreBoard,
+            displayScoreBoard,
+        }
+    }
+    const createDelButton = (function(){
         const resetBtn = document.createElement('button');
         resetBtn.classList.add('reset-Btn');
         resetBtn.textContent = 'Reset';
@@ -339,7 +366,6 @@ function DisplayController(){
         document.body.appendChild(resetBtn);
         resetBtn.addEventListener("click", resetButton);
     })();
-
     const updateScreen = () => {
         boardDiv.textContent = '';
         const board = game.getBoard();
@@ -371,28 +397,9 @@ function DisplayController(){
         const roundStart = game.playRound(selectedRow, selectedColumn);
 
        if(roundStart === true){ //checks true if the round has a winner
-            displayWinner();
+        scoreBoard()
        }
        updateScreen();
-    }
-    function displayWinner(){
-        const getWinner = game.returnWinner();
-        const h2 = document.createElement('h2');
-        const winCounterEl = document.querySelector('.win-counter');
-        h2.textContent = `The winner of this round is ${getWinner}`
-
-        let p1Wins = game.getPlayerOneWins();
-        let p2Wins = game.getPlayerTwoWins();
-        
-        const createP1Counter = document.createElement('h3');
-        const createP2Counter = document.createElement('h3');
-
-        createP1Counter.textContent = `Player One Wins: ${p1Wins}`;
-        createP2Counter.textContent = `Player Two Wins: ${p2Wins}`;
-        
-        document.body.appendChild(h2);
-        winCounterEl.appendChild(createP1Counter);
-        winCounterEl.appendChild(createP2Counter);
     }
     function resetButton(e){
         game.createBoard();
