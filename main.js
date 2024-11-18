@@ -1,7 +1,6 @@
 //Store the gameboard as an array inside of a Gameboard object. Players are going to be stored in objects.
 //The main goal is to store as little global code as possible. 
 //Think carefully about where each of logic should reside. Each little piece of functionality should be able to fit in the game, player, or gameboard objects.
-//wrap gameboard, displaycontroller inside an IIFE.
 //Tic tac toe is a board with 3 columns and 3 rows.
 //X goes first, regardless of the player.
 //Anytime a marker is placed, it should check whether that space in the object array to be empty.
@@ -51,7 +50,7 @@ function Gameboard() {
   
     const mapBoard = () => {
         const boardVals = board.map((space) => space.map((cell) => cell.getValue()))
-        // console.log(boardVals); for testing purposes only, logs the board array and shows 
+        // console.log(boardVals); for testing purposes only, logs the board array and shows the 2d and its markers
         return boardVals;
     }
     return {
@@ -118,8 +117,9 @@ const formCreation = (function() {
                 alert('Player Two has no name!');
             }
             else{
-                players.push(playerOneName, playerTwoName);
-                DisplayController();
+                players.push(playerOneName, playerTwoName);    //Push the form-created players to an array to destructure later
+                const display = DisplayController()
+                display.createScoreBoard();
             }
         })
     }
@@ -145,7 +145,7 @@ function GameController(){
     const playerTwo = Player(players[1], 'o');
     const board = Gameboard();
 
-    let winner = null;
+    let winner = null;                             //winner is null until a winner is hoisted by the checkWinner function
     let playerOneWins = 0;
     let playerTwoWins = 0;
     let activePlayer = playerOne;
@@ -170,8 +170,8 @@ function GameController(){
 
         if(boardChecker == false){
             console.log('invalid move!')
-            switchPlayer();                         //forces player to switch to ensure that a player that makes an invalid move still has a turn.
-        }
+            switchPlayer();                         //Due to the way the player is switched anytime a move is initiated, it will switch the player. 
+        }                                           //Switching the player here allows for the player that made an invalid move the current active player. 
 
         const checkWin = checkWinner(row, col)
             if(checkWin !== false){
@@ -199,7 +199,8 @@ function GameController(){
         let countX = 0;
         let countO = 0;
 
-        for(let c = 0; c < cols; c++){      //Horizontal check using counter
+        //Horizontal check using counter
+        for(let c = 0; c < cols; c++){      
             if(boardVals[row][c]  === 'x'){
                 countX++
             }
@@ -220,11 +221,14 @@ function GameController(){
                 return winner;
             }
         } 
+        //These countX and countO reset the counter to 0. If these are not present, the counter is incremented anytime a marker is placed, 
+        //declaring a winner regardless of whether it is 3 contigious markers or not
         countX = 0;
         countO = 0;
 
+        //Vertical check using counter
         for(let r = 0; r < rows; r++){
-            if(boardVals[r][col] === 'x'){      //Vertical check using counter
+            if(boardVals[r][col] === 'x'){      
                 countX++;
             }else if(boardVals[r][col] === 'o'){
                 countO++;
@@ -246,6 +250,7 @@ function GameController(){
         countX = 0;
         countO = 0;
 
+        //anti-diagonal check top right to bottom left
         for(let r = 0; r < rows; r++){
             let c = col - row + r;
             if(c >= 0 && c < cols && boardVals[r][c] === 'x'){
@@ -266,6 +271,7 @@ function GameController(){
                 return winner;
             }
         }
+        //anti-diagonal check bottom left to top right
         for(let r = 0; r < rows; r++){
             let c = col + row - r;
             if (c >= 0 && c < cols && boardVals[r][c] === 'x'){
@@ -286,8 +292,12 @@ function GameController(){
                 return winner;
             }
         }
+        //The two algorithms above are similar in function to the next algorithm to traverse the 2D array
+        //However, because the traversal of top-right to bottom-left, and bottom-left to top-right are mirrored in traversal, i.e (top-right starting = (-1,1)) and (bottom-left starting = (1, -1)), it requires two formulas to check for values and count the inputs.
     
+        //The algorithm below requires only one formula because traversal between top-left to bottom-right, and bottom-right to top-left are inverse and constants. i.e. (top-left to bottom-right starting = (1,1)), (bottom-right to top-left starting = (-1, -1))
         // Check bottom-left to top-right diagonal
+
         for(let r = 0; r < rows; r++){
             let c = row + col - r; 
             if(c >= 0 && c < cols && boardVals[r][c] === 'x'){
@@ -329,35 +339,35 @@ function DisplayController(){
     const game = GameController();
     const boardDiv = document.querySelector('.board');
 
-    function scoreBoard() {
-        const createScoreBoard = () => {
-            const winnerH2 = document.createElement('h2');
-            const getWinnerH2 = () => winnerH2
-            winnerH2.classList.add('winnerh2');
-            const p1Counter = document.createElement('h3');
-            p1Counter.classList.add('p1counter');
-            const p2Counter = document.createElement('h3');
-            p2Counter.classList.add('p2counter');
-        }
-        const displayScoreBoard = () => {
-            const winCounterEl = document.querySelector('.wincounter');
-            const getWinner = game.returnWinner();
-            let p1Wins = game.getPlayerOneWins();
-            let p2Wins = game.getPlayerTwoWins();
-    
-            winnerH2.textContent = `The winner of this round is ${getWinner}`;
-            p1Counter.textContent = `Player One Wins: ${p1Wins}`;
-            p2Counter.textContent = `Player Two Wins: ${p2Wins}`;
+    const createScoreBoard = () => {
+        const winCounterEl = document.querySelector('.win-counter');
+        const winnerH2 = document.createElement('h2');
+        winnerH2.classList.add('winnerh2');
+        const p1Counter = document.createElement('h3');
+        p1Counter.classList.add('p1counter');
+        const p2Counter = document.createElement('h3');
+        p2Counter.classList.add('p2counter');
+        
+        document.body.appendChild(winnerH2);
+        winCounterEl.appendChild(p1Counter);
+        winCounterEl.appendChild(p2Counter);
             
-            document.body.appendChild(getWinnerH2);
-            winCounterEl.appendChild(getP1Counter);
-            winCounterEl.appendChild(getP2Counter);
-        }
-        return {
-            createScoreBoard,
-            displayScoreBoard,
-        }
     }
+    const displayWinner = () => {
+        const winnerEl = document.querySelector('.winnerh2')
+        const getp1El = document.querySelector('.p1counter');
+        const getp2El = document.querySelector('.p2counter');
+
+        const getWinner = game.returnWinner();
+        let p2Wins = game.getPlayerTwoWins();
+        let p1Wins = game.getPlayerOneWins();
+
+        winnerEl.textContent = `The winner of this round is ${getWinner}`;
+        getp1El.textContent = `Player One Wins: ${p1Wins}`;
+        getp2El.textContent = `Player Two Wins: ${p2Wins}`;
+        }
+       
+
     const createDelButton = (function(){
         const resetBtn = document.createElement('button');
         resetBtn.classList.add('reset-Btn');
@@ -396,18 +406,22 @@ function DisplayController(){
         }
         const roundStart = game.playRound(selectedRow, selectedColumn);
 
-       if(roundStart === true){ //checks true if the round has a winner
-        scoreBoard()
+       if(roundStart === true){ 
+        displayWinner();
        }
        updateScreen();
     }
-    function resetButton(e){
+    function resetButton(e){                                            
         game.createBoard();
         game.resetPlayer();
         updateScreen();
     }
     boardDiv.addEventListener("click", clickHandlerBoard)
     updateScreen();
+
+    return {
+        createScoreBoard
+    }
 } 
 const container = document.querySelector('.container');
 container.classList.add('hide');
